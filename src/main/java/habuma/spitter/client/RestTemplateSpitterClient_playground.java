@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 
 public class RestTemplateSpitterClient_playground implements SpitterClient {
-  private RestTemplate restTemplate;
+  private RestTemplate restTemplate = new RestTemplate();
   
   public Spittle[] retrieveSpittlesForSpitter(String username) {
     ResponseEntity<Spittle[]> response = 
@@ -31,19 +31,20 @@ public class RestTemplateSpitterClient_playground implements SpitterClient {
   }
 
   public String postSpitter(Spitter spitter) {
-    // TODO Auto-generated method stub
-    return null;
+	  RestTemplate rest = new RestTemplate();
+    return rest.postForLocation("http://localhost:8080/mainP/Spitter/spitters", 
+              spitter, Spitter.class).toString();
+  
   }
   
   public void updateSpittle(Spittle spittle) throws SpitterException {
       restTemplate.put("http://localhost:8080/mainP/spittles/{id}", 
                        spittle,  spittle.getId());
+      
   }
   
   public void deleteSpittle(long id) {
-    try {
-      restTemplate.delete(new URI("http://localhost:8080/Spitter/spittles/54"));
-    } catch (URISyntaxException wontHappen) { }
+	  restTemplate.delete("http://localhost:8080/Spitter/spittles/{id}",id);
   }
   
   
@@ -62,12 +63,65 @@ public class RestTemplateSpitterClient_playground implements SpitterClient {
     
     return response.getBody();
   }
+    
+    
+  public Spitter postSpitterForObject(Spitter spitter) { 
+  RestTemplate rest = new RestTemplate();
+  return rest.postForObject("http://localhost:8080/mainP/spitters", 
+          spitter, Spitter.class);
+  
+  //or if i want get location
+  //RestTemplate rest=new RestTemplate();
+  //ResponseEntity<Spitter>response=rest.postForEntity(
+  //"http://localhost:8080/mainP/spitters",spitter,Spitter.class);
+  //Spitter spitter=response.getBody();
+  //URI url=response.getHeaders().getLocation();
+}
   
   public static void main(String[] args) {
-    RestTemplate restTemplate = new RestTemplate();
+    RestTemplate restTemplate = new RestTemplate();  
+    
+    
     RestTemplateSpitterClient_playground rsc = new RestTemplateSpitterClient_playground();
-    System.out.println("retrive spitter from service: " + rsc.getSpitter("habuma"));
-    rsc.retrieveSpittlesForSpitter("habuma");
+    Spitter habuma = rsc.getSpitter("habuma");
+    
+    System.out.println("retrive spitter from service: " + habuma);
+    
+    Spittle [] spittles = rsc.retrieveSpittlesForSpitter("habuma");
+    for(Spittle s : spittles){
+    	System.out.println("spittle : " +  s);
+    	
+    }
+    
+    spittles[0].setText("modyfied spittle text");
+  //  try {
+    	spittles[0].setSpitter(habuma);
+    	System.out.println(spittles[0].getSpitter());
+    	
+		//rsc.updateSpittle(spittles[0]);
+	//} catch (SpitterException e) {
+		
+	//	e.printStackTrace();
+	//}
+    
+    
+    spittles = rsc.retrieveSpittlesForSpitter("habuma");
+    for(Spittle s : spittles){
+    	System.out.println("spittle : " +  s);
+    	
+    }
+    
+    //rsc.deleteSpittle(1);
+    
+    
+    Spitter newSpitter = new Spitter();
+    	newSpitter.setEmail("email@as.asc");
+        newSpitter.setFullName("fullName");
+        newSpitter.setId((long)33);
+        newSpitter.setPassword("password");
+        newSpitter.setUsername("usetrnace");
+        
+    System.out.println(rsc.postSpitterForObject(newSpitter));
     
     
 //    HashMap<String, Object> map = new HashMap<String, Object>();
